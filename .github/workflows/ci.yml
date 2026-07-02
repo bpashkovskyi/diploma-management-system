@@ -62,4 +62,4 @@ jobs:
       - name: Integration Test
         env:
           DIPLOMA_INTEGRATION_PG: Host=localhost;Port=5432;Database=diploma_test;Username=test;Password=test
-        run: dotnet test --no-build -c Release --filter "FullyQualifiedName~Integration"
+        run: dotnet test tests/DiplomaManagementSystem.Integration.Tests --no-build -c Release

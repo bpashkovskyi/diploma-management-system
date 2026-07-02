@@ -7,7 +7,7 @@ internal sealed class IntegrationTestHostEnvironment : IHostEnvironment
 {
     public IntegrationTestHostEnvironment()
     {
-        ContentRootPath = @"D:\dms-it";
+        ContentRootPath = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "dms-integration-tests"));
         Directory.CreateDirectory(ContentRootPath);
         ContentRootFileProvider = new PhysicalFileProvider(ContentRootPath);
     }

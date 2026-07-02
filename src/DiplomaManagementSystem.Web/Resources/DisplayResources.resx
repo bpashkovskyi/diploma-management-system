@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="DefenceSessionType_Bachelor" xml:space="preserve"><value>Бакалавр</value></data>
+  <data name="DefenceSessionType_Master" xml:space="preserve"><value>Магістр</value></data>
+  <data name="DefenceSessionStatus_Active" xml:space="preserve"><value>Активна</value></data>
+  <data name="DefenceSessionStatus_Archived" xml:space="preserve"><value>Архів</value></data>
+  <data name="AnnualRoleType_DepartmentHead" xml:space="preserve"><value>Завідувач кафедри</value></data>
+  <data name="AnnualRoleType_ExamCommissionSecretary" xml:space="preserve"><value>Секретар ДЕК</value></data>
+  <data name="AnnualRoleType_AntiPlagiarismOfficer" xml:space="preserve"><value>Відповідальний за антиплагіат</value></data>
+  <data name="AnnualRoleType_FormattingReviewer" xml:space="preserve"><value>Нормоконтролер</value></data>
+  <data name="DiplomaLifecycleStatus_AwaitingSupervisor" xml:space="preserve"><value>Очікує керівника</value></data>
+  <data name="DiplomaLifecycleStatus_SupervisorConfirmed" xml:space="preserve"><value>Керівник підтверджено</value></data>
+  <data name="DiplomaLifecycleStatus_TopicInReview" xml:space="preserve"><value>Тема на розгляді</value></data>
+  <data name="DiplomaLifecycleStatus_TopicApproved" xml:space="preserve"><value>Тема затверджена</value></data>
+  <data name="DiplomaLifecycleStatus_WorkInProgressByStudent" xml:space="preserve"><value>Робота виконується</value></data>
+  <data name="DiplomaLifecycleStatus_DocumentsInProgress" xml:space="preserve"><value>Документи в роботі</value></data>
+  <data name="DiplomaLifecycleStatus_ReadyForAdmission" xml:space="preserve"><value>Готово до допуску</value></data>
+  <data name="DiplomaLifecycleStatus_Admitted" xml:space="preserve"><value>Допущено</value></data>
+  <data name="DiplomaAdmissionStatus_NotAdmitted" xml:space="preserve"><value>Не допущено</value></data>
+  <data name="DiplomaAdmissionStatus_Admitted" xml:space="preserve"><value>Допущено</value></data>
+  <data name="SupervisorAssignmentStatus_Pending" xml:space="preserve"><value>Очікує</value></data>
+  <data name="SupervisorAssignmentStatus_NotSelected" xml:space="preserve"><value>Не обрано</value></data>
+  <data name="SupervisorAssignmentStatus_Confirmed" xml:space="preserve"><value>Підтверджено</value></data>
+  <data name="SupervisorAssignmentStatus_Rejected" xml:space="preserve"><value>Відхилено</value></data>
+  <data name="TopicVersionStatus_PendingSupervisor" xml:space="preserve"><value>Очікує керівника</value></data>
+  <data name="TopicVersionStatus_PendingHead" xml:space="preserve"><value>Очікує завідувача</value></data>
+  <data name="TopicVersionStatus_Approved" xml:space="preserve"><value>Затверджено</value></data>
+  <data name="TopicVersionStatus_Rejected" xml:space="preserve"><value>Відхилено</value></data>
+  <data name="AdmissionStep_SupervisorFeedback" xml:space="preserve"><value>Відгук керівника</value></data>
+  <data name="AdmissionStep_FormattingReview" xml:space="preserve"><value>Нормоконтроль</value></data>
+  <data name="AdmissionStep_AntiPlagiarismClearance" xml:space="preserve"><value>Антиплагіат</value></data>
+  <data name="AdmissionStep_ReviewerAssignment" xml:space="preserve"><value>Призначення рецензента</value></data>
+  <data name="AdmissionStep_ExternalReview" xml:space="preserve"><value>Рецензія</value></data>
+  <data name="FormattingReviewOutcome_Approved" xml:space="preserve"><value>Допущено</value></data>
+  <data name="FormattingReviewOutcome_ApprovedWithRemarks" xml:space="preserve"><value>Допущено з зауваженнями</value></data>
+  <data name="FormattingReviewOutcome_NotApproved" xml:space="preserve"><value>Не допущено</value></data>
+  <data name="CheckpointOutcome_Approved" xml:space="preserve"><value>Допущено</value></data>
+  <data name="CheckpointOutcome_ApprovedWithRemarks" xml:space="preserve"><value>Допущено з зауваженнями</value></data>
+  <data name="CheckpointOutcome_NotApproved" xml:space="preserve"><value>Не допущено</value></data>
+  <data name="ReviewAssignmentStatus_NotAssigned" xml:space="preserve"><value>Не призначено</value></data>
+  <data name="ReviewAssignmentStatus_Assigned" xml:space="preserve"><value>Призначено</value></data>
+  <data name="ReviewAssignmentStatus_Completed" xml:space="preserve"><value>Завершено</value></data>
+  <data name="DiplomaDocumentKind_StudentWork" xml:space="preserve"><value>Робота студента</value></data>
+  <data name="DiplomaDocumentKind_SupervisorFeedback" xml:space="preserve"><value>Відгук керівника</value></data>
+  <data name="DiplomaDocumentKind_ExternalReview" xml:space="preserve"><value>Рецензія</value></data>
+  <data name="DiplomaDocumentKind_AntiPlagiarismReport" xml:space="preserve"><value>Антиплагіат</value></data>
+  <data name="DiplomaDocuments_FormattingReviewStatusOnly" xml:space="preserve"><value>Без файлу (лише статус у прогресі)</value></data>
+</root>

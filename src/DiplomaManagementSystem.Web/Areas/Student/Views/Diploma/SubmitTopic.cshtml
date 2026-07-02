@@ -1,0 +1,23 @@
+@model SubmitTopicViewModel
+@{
+    ViewData["Title"] = "Подати тему";
+}
+
+<h1 class="mb-4">@ViewData["Title"]</h1>
+
+<form asp-action="SubmitTopic" method="post" class="col-lg-8">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="DiplomaId"/>
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+    <div class="mb-3">
+        <label asp-for="Title" class="form-label">Назва теми</label>
+        <input asp-for="Title" class="form-control" maxlength="500" required/>
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Подати</button>
+    <a class="btn btn-link" asp-action="Index">Скасувати</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial"/>
+}

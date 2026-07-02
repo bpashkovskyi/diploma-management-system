@@ -1,0 +1,59 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+
+
+  <ItemGroup>
+
+    <ProjectReference Include="..\DiplomaManagementSystem.Domain\DiplomaManagementSystem.Domain.csproj" />
+
+  </ItemGroup>
+
+
+
+  <ItemGroup>
+
+    <PackageReference Include="ClosedXML" Version="0.104.2" />
+
+    <PackageReference Include="FluentValidation" Version="12.0.0" />
+
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.0.0" />
+
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.0" />
+
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.0" />
+
+  </ItemGroup>
+
+
+
+  <PropertyGroup>
+
+    <TargetFramework>net10.0</TargetFramework>
+
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <Nullable>enable</Nullable>
+
+  </PropertyGroup>
+
+
+
+  <ItemGroup>
+
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+
+  </ItemGroup>
+
+
+
+  <ItemGroup>
+
+    <InternalsVisibleTo Include="DiplomaManagementSystem.Application.Tests" />
+
+    <InternalsVisibleTo Include="DiplomaManagementSystem.Infrastructure" />
+
+  </ItemGroup>
+
+
+
+</Project>

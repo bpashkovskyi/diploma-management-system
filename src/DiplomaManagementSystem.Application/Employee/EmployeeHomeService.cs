@@ -1,0 +1,143 @@
+using DiplomaManagementSystem.Application;
+using DiplomaManagementSystem.Application.Employee.Contracts;
+using DiplomaManagementSystem.Application.Employee.Dtos;
+using DiplomaManagementSystem.Application.Persistence.Contracts;
+using DiplomaManagementSystem.Application.Secretary.Dtos;
+using DiplomaManagementSystem.Domain.Enums;
+
+namespace DiplomaManagementSystem.Application.Employee;
+
+internal sealed class EmployeeHomeService(
+    IEmployeeHomeQueries employeeHomeQueries,
+    IAnnualRoleQueries annualRoleQueries,
+    ISupervisorWorkflowService supervisorWorkflowService,
+    ISupervisorDiplomaListService supervisorDiplomaListService,
+    IDepartmentHeadWorkflowService departmentHeadWorkflowService,
+    IAdmissionReviewService admissionReviewService) : IEmployeeHomeService
+{
+    public async Task<EmployeeHomeDto> GetHomeAsync(Guid employeeId, CancellationToken cancellationToken = default)
+    {
+        List<EmployeeRoleCardDto> roles = [];
+
+        int pendingStudents = (await supervisorWorkflowService.GetPendingStudentsAsync(employeeId, cancellationToken)).Count;
+        int pendingSupervisorTopics = (await supervisorWorkflowService.GetTopicReviewsAsync(employeeId, cancellationToken)).Count;
+        bool isSupervisor = pendingStudents > 0
+                            || pendingSupervisorTopics > 0
+                            || await employeeHomeQueries.HasAnySupervisorDiplomasAsync(employeeId, cancellationToken);
+
+        if (isSupervisor)
+        {
+            SupervisorDiplomaListPageDto studentsPage = await supervisorDiplomaListService.GetListAsync(
+                employeeId,
+                new DiplomaListFilterDto(null, null, null, null, null, null),
+                cancellationToken);
+
+            roles.Add(new EmployeeRoleCardDto(
+                "SupervisorStudents",
+                EmployeePageTitles.MyStudents,
+                studentsPage.Items.Count,
+                "Supervisor",
+                "Students"));
+
+            roles.Add(new EmployeeRoleCardDto(
+                "SupervisorPendingStudents",
+                EmployeePageTitles.ConfirmStudentRequest,
+                pendingStudents,
+                "Supervisor",
+                "PendingStudents"));
+
+            roles.Add(new EmployeeRoleCardDto(
+                "SupervisorTopicReviews",
+                EmployeePageTitles.ApproveTopicAsSupervisor,
+                pendingSupervisorTopics,
+                "Supervisor",
+                "TopicReviews"));
+        }
+
+        List<Guid> departmentHeadSessionIds = await annualRoleQueries.GetSessionIdsAsync(
+            employeeId,
+            AnnualRoleType.DepartmentHead,
+            cancellationToken);
+
+        if (departmentHeadSessionIds.Count > 0)
+        {
+            int pendingHeadTopics = (await departmentHeadWorkflowService.GetPendingTopicsAsync(employeeId, cancellationToken)).Count;
+
+            roles.Add(new EmployeeRoleCardDto(
+                "DepartmentHead",
+                EmployeePageTitles.ApproveTopicAsDepartmentHead,
+                pendingHeadTopics,
+                "DepartmentHead",
+                "PendingTopics"));
+        }
+
+        int pendingSupervisorFeedback = (await admissionReviewService.GetSupervisorFeedbackPendingAsync(
+            employeeId,
+            cancellationToken)).Count;
+
+        if (isSupervisor && pendingSupervisorFeedback > 0)
+        {
+            roles.Add(new EmployeeRoleCardDto(
+                "SupervisorFeedback",
+                EmployeePageTitles.SubmitSupervisorFeedback,
+                pendingSupervisorFeedback,
+                "Supervisor",
+                "Checkpoints"));
+        }
+
+        int pendingReviewerAssignments = (await admissionReviewService.GetReviewerAssignmentsAsync(
+            employeeId,
+            cancellationToken)).Count;
+
+        if (pendingReviewerAssignments > 0
+            || await employeeHomeQueries.HasAnyReviewerDiplomasAsync(employeeId, cancellationToken))
+        {
+            roles.Add(new EmployeeRoleCardDto(
+                "Reviewer",
+                EmployeePageTitles.Reviewer,
+                pendingReviewerAssignments,
+                "Reviewer",
+                "Assignments"));
+        }
+
+        List<Guid> antiPlagiarismSessionIds = await annualRoleQueries.GetSessionIdsAsync(
+            employeeId,
+            AnnualRoleType.AntiPlagiarismOfficer,
+            cancellationToken);
+
+        if (antiPlagiarismSessionIds.Count > 0)
+        {
+            int pendingAntiPlagiarism = (await admissionReviewService.GetAntiPlagiarismPendingAsync(
+                employeeId,
+                cancellationToken)).Count;
+
+            roles.Add(new EmployeeRoleCardDto(
+                "AntiPlagiarism",
+                EmployeePageTitles.AntiPlagiarism,
+                pendingAntiPlagiarism,
+                "AntiPlagiarism",
+                "Pending"));
+        }
+
+        List<Guid> formattingSessionIds = await annualRoleQueries.GetSessionIdsAsync(
+            employeeId,
+            AnnualRoleType.FormattingReviewer,
+            cancellationToken);
+
+        if (formattingSessionIds.Count > 0)
+        {
+            int pendingFormatting = (await admissionReviewService.GetFormattingReviewPendingAsync(
+                employeeId,
+                cancellationToken)).Count;
+
+            roles.Add(new EmployeeRoleCardDto(
+                "FormattingReview",
+                EmployeePageTitles.FormattingReview,
+                pendingFormatting,
+                "FormattingReview",
+                "Pending"));
+        }
+
+        return new EmployeeHomeDto(roles);
+    }
+}

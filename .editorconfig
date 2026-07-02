@@ -1,0 +1,23 @@
+root = true
+
+[*]
+end_of_line = crlf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.cs]
+charset = utf-8
+
+# F-07: usings and namespace style
+dotnet_sort_system_directives_first = true
+dotnet_separate_import_directive_groups = false
+csharp_using_directive_placement = outside_namespace:suggestion
+csharp_style_namespace_declarations = file_scoped:suggestion
+
+# F-07: at most one consecutive blank line (IDE2000; max_blank_lines_in_row for Rider/ReSharper)
+dotnet_style_allow_multiple_blank_lines_experimental = false
+max_blank_lines_in_row = 1
+dotnet_diagnostic.IDE2000.severity = warning
+
+csharp_new_line_between_query_expression_clauses = true
+max_line_length = off

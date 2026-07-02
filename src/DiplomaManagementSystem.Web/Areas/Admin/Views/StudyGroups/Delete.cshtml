@@ -1,0 +1,32 @@
+@model DiplomaManagementSystem.Web.Areas.Admin.Models.StudyGroupDeleteViewModel
+@{
+    ViewData["Title"] = "Видалення групи";
+}
+
+<h2>Видалення групи</h2>
+<p class="text-muted">Сесія: @Model.SessionLabel</p>
+
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+<p>Ви впевнені, що хочете видалити групу <strong>@Model.Name</strong>?</p>
+
+@if (!Model.CanDelete)
+{
+    <div class="alert alert-warning">
+        <p class="mb-0">Групу не можна видалити: у ній @Model.StudentCount студент(ів).</p>
+    </div>
+}
+
+@if (Model.CanDelete)
+{
+    <form asp-action="Delete" method="post" data-confirm="Видалити групу? Дію не можна скасувати.">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id"/>
+        <button type="submit" class="btn btn-danger">Видалити</button>
+        <a class="btn btn-link" asp-controller="DefenceSessions" asp-action="Details" asp-route-id="@Model.DefenceSessionId">Скасувати</a>
+    </form>
+}
+else
+{
+    <a class="btn btn-link" asp-controller="DefenceSessions" asp-action="Details" asp-route-id="@Model.DefenceSessionId">Назад</a>
+}

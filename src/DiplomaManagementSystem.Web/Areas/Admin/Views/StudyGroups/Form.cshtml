@@ -1,0 +1,28 @@
+@model DiplomaManagementSystem.Web.Areas.Admin.Models.StudyGroupFormViewModel
+@{
+    ViewData["Title"] = Model.Id is null ? "Нова група" : "Редагування групи";
+}
+
+<h2>@ViewData["Title"]</h2>
+<p class="text-muted">Сесія: @Model.SessionLabel</p>
+
+<form asp-action="@(Model.Id is null ? "Create" : "Edit")" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="DefenceSessionId"/>
+    @if (Model.Id is not null)
+    {
+        <input type="hidden" asp-for="Id"/>
+    }
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label">Назва</label>
+        <input asp-for="Name" class="form-control" maxlength="50"/>
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Зберегти</button>
+    <a class="btn btn-link" asp-controller="DefenceSessions" asp-action="Details" asp-route-id="@Model.DefenceSessionId">Скасувати</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial"/>
+}

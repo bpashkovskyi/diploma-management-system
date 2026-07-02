@@ -1,0 +1,56 @@
+@model AdminPreviewSelectUserViewModel
+@using DiplomaManagementSystem.Web.AdminPreview
+@{
+    ViewData["Title"] = "Перегляд як " + Model.ModeDisplay;
+}
+
+<h1 class="mb-3">@ViewData["Title"]</h1>
+<p class="text-muted mb-4">
+    @if (Model.Mode == AdminPreviewMode.Employee)
+    {
+        <text>Оберіть викладача. Система покаже його реальні можливості: керівник, секретар ДЕК, завідувач тощо.</text>
+    }
+    else
+    {
+        <text>Оберіть користувача, від імені якого адміністратор переглядатиме систему.</text>
+    }
+</p>
+
+<partial name="_TempDataAlerts"/>
+
+@if (!Model.Users.Any())
+{
+    <div class="alert alert-info">
+        Немає користувачів цього типу. Спочатку створіть їх в адмін-панелі.
+    </div>
+}
+else
+{
+    <div class="list-group mb-4">
+        @foreach (var user in Model.Users)
+        {
+            <form asp-controller="AdminPreview" asp-action="SetUser" method="post" class="list-group-item list-group-item-action p-0 border-0 mb-2">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="userId" value="@user.Id"/>
+                <input type="hidden" name="returnUrl" value="@Model.ReturnUrl"/>
+                <button type="submit" class="list-group-item list-group-item-action text-start w-100">
+                    <div class="fw-semibold">@user.FullName</div>
+                    <div class="small text-muted">@user.Email</div>
+                    @if (!string.IsNullOrWhiteSpace(user.Subtitle))
+                    {
+                        <div class="small text-muted">@user.Subtitle</div>
+                    }
+                </button>
+            </form>
+        }
+    </div>
+}
+
+<p class="mb-0">
+    <form asp-controller="AdminPreview" asp-action="Set" method="post" class="d-inline">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="mode" value="@AdminPreviewMode.Admin"/>
+        <input type="hidden" name="returnUrl" value="@Model.ReturnUrl"/>
+        <button type="submit" class="btn btn-outline-secondary">Скасувати перегляд</button>
+    </form>
+</p>

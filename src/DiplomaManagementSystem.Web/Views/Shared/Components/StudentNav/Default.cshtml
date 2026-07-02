@@ -1,0 +1,9 @@
+@model WorkNavViewModel
+@{
+    string label = Model.SessionType.HasValue
+        ? DefenceWorkLabel.MyWork(Model.SessionType.Value)
+        : "Моя робота";
+}
+<li class="nav-item">
+    <a class="nav-link text-dark" asp-area="Student" asp-controller="Diploma" asp-action="Index">@label</a>
+</li>

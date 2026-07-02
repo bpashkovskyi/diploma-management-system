@@ -1,0 +1,45 @@
+@model AdmittedReportViewModel
+@{
+    ViewData["Title"] = SecretaryPageTitles.AdmittedReport;
+}
+
+<h1 class="mb-1">@ViewData["Title"]</h1>
+<p class="text-muted mb-4">@Model.SessionLabel</p>
+
+<p class="mb-3">
+    <a asp-action="AdmittedCsv">Завантажити CSV</a>
+    ·
+    <a asp-area="Secretary" asp-controller="Dashboard" asp-action="Index">@SecretaryPageTitles.Home</a>
+</p>
+
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th>Студент</th>
+        <th>Група</th>
+        <th>Тема</th>
+        <th>Керівник</th>
+        <th>Рецензент</th>
+        <th>Дата захисту</th>
+    </tr>
+    </thead>
+    <tbody>
+    @if (!Model.Items.Any())
+    {
+        <tr>
+            <td colspan="6" class="text-muted">Допущених студентів ще немає.</td>
+        </tr>
+    }
+    @foreach (var item in Model.Items)
+    {
+        <tr>
+            <td>@item.StudentFullName</td>
+            <td>@item.StudyGroupName</td>
+            <td>@item.TopicTitle</td>
+            <td>@item.SupervisorName</td>
+            <td>@(item.ReviewerName ?? "—")</td>
+            <td>@(item.DefenceDate?.ToString("d") ?? "—")</td>
+        </tr>
+    }
+    </tbody>
+</table>

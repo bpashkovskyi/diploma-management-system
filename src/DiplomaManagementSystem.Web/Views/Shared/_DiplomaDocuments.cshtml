@@ -1,0 +1,66 @@
+@using DiplomaManagementSystem.Domain.Enums
+@model DiplomaManagementSystem.Web.Areas.Student.Models.DiplomaDocumentsViewModel
+
+<div class="card mb-4">
+    <div class="card-header">Документи</div>
+    <div class="card-body">
+        <h3 class="h6">Версії роботи</h3>
+        @if (!Model.StudentWorkVersions.Any())
+        {
+            <p class="text-muted">Ще немає завантажених файлів роботи.</p>
+        }
+        else
+        {
+            <ul class="list-group mb-4">
+                @foreach (var document in Model.StudentWorkVersions.OrderByDescending(d => d.VersionNumber))
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>v@(document.VersionNumber) — @document.FileName</span>
+                        <a class="btn btn-sm btn-outline-primary" href="@document.ViewUrl" target="_blank" rel="noopener">Відкрити</a>
+                    </li>
+                }
+            </ul>
+        }
+
+        <h3 class="h6">Результати перевірок</h3>
+        <dl class="row mb-0">
+            <dt class="col-sm-4">@UkrainianDisplay.FormatAdmissionStep(AdmissionStep.SupervisorFeedback)</dt>
+            <dd class="col-sm-8">
+                @if (Model.LatestSupervisorFeedback is not null)
+                {
+                    <a href="@Model.LatestSupervisorFeedback.ViewUrl" target="_blank" rel="noopener">@Model.LatestSupervisorFeedback.FileName</a>
+                }
+                else
+                {
+                    <span class="text-muted">—</span>
+                }
+            </dd>
+            <dt class="col-sm-4">@UkrainianDisplay.FormatAdmissionStep(AdmissionStep.FormattingReview)</dt>
+            <dd class="col-sm-8">
+                <span class="text-muted">@UkrainianDisplay.FormattingReviewDocumentStatusHint</span>
+            </dd>
+            <dt class="col-sm-4">@UkrainianDisplay.FormatAdmissionStep(AdmissionStep.AntiPlagiarismClearance)</dt>
+            <dd class="col-sm-8">
+                @if (Model.LatestAntiPlagiarismReport is not null)
+                {
+                    <a href="@Model.LatestAntiPlagiarismReport.ViewUrl" target="_blank" rel="noopener">@Model.LatestAntiPlagiarismReport.FileName</a>
+                }
+                else
+                {
+                    <span class="text-muted">—</span>
+                }
+            </dd>
+            <dt class="col-sm-4">@UkrainianDisplay.FormatAdmissionStep(AdmissionStep.ExternalReview)</dt>
+            <dd class="col-sm-8">
+                @if (Model.LatestExternalReview is not null)
+                {
+                    <a href="@Model.LatestExternalReview.ViewUrl" target="_blank" rel="noopener">@Model.LatestExternalReview.FileName</a>
+                }
+                else
+                {
+                    <span class="text-muted">—</span>
+                }
+            </dd>
+        </dl>
+    </div>
+</div>

@@ -1,0 +1,6 @@
+@model OutcomeStepsChecklistViewModel
+@{
+    bool complete = Model.Completed >= Model.Total && Model.Total > 0;
+    string css = complete ? "text-success" : "text-warning";
+}
+<span class="@css">@Model.Completed / @Model.Total</span>

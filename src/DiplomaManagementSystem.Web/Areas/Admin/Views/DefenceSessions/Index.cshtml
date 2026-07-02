@@ -1,0 +1,57 @@
+@model DiplomaManagementSystem.Web.Areas.Admin.Models.DefenceSessionListViewModel
+@{
+    ViewData["Title"] = "Сесії захисту";
+}
+
+<h2>Сесії захисту</h2>
+
+<partial name="_TempDataAlerts"/>
+
+<p>
+    <a class="btn btn-primary" asp-action="Create">Нова сесія</a>
+</p>
+
+<table class="table table-striped align-middle">
+    <thead>
+    <tr>
+        <th>Сесія</th>
+        <th>Статус</th>
+        <th>Груп</th>
+        <th>Студентів</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model.Items)
+    {
+        <tr>
+            <td>
+                <a asp-action="Details" asp-route-id="@item.Id" class="fw-semibold text-decoration-none">
+                    @item.SessionLabel
+                </a>
+            </td>
+            <td>@item.StatusDisplay</td>
+            <td>@item.GroupCount</td>
+            <td>@item.DiplomaCount</td>
+            <td class="text-end">
+                <div class="session-row-actions">
+                    <a class="btn btn-sm btn-outline-success" asp-controller="Students" asp-action="Index" asp-route-defenceSessionId="@item.Id">Студенти</a>
+                    @if (item.IsActive)
+                    {
+                        <a class="btn btn-sm btn-outline-info" asp-controller="AnnualRoles" asp-action="Index" asp-route-defenceSessionId="@item.Id">Ролі</a>
+                    }
+                    <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@item.Id">Редагувати</a>
+                    @if (item.CanArchive)
+                    {
+                        <form asp-action="Archive" asp-route-id="@item.Id" method="post" data-confirm="Заархівувати сесію? Усі зміни будуть заблоковані.">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="returnToList" value="true"/>
+                            <button type="submit" class="btn btn-sm btn-outline-warning">Архівувати</button>
+                        </form>
+                    }
+                </div>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

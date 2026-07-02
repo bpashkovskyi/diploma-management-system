@@ -1,0 +1,44 @@
+@model IReadOnlyList<TopicHistoryEntryViewModel>
+
+@if (!Model.Any())
+{
+    <p class="text-muted">Ще немає поданих версій теми.</p>
+}
+else
+{
+    <div class="list-group list-group-flush">
+        @foreach (var version in Model)
+        {
+            <div class="list-group-item px-0">
+                <div class="d-flex justify-content-between gap-3">
+                    <strong>v@(version.VersionNumber) — @version.Title</strong>
+                    <span class="text-muted small">@version.StatusDisplay</span>
+                </div>
+                @if (!string.IsNullOrWhiteSpace(version.SubmittedAtDisplay))
+                {
+                    <div class="text-muted small mt-1">@version.SubmittedAtDisplay</div>
+                }
+                else if (version.SubmittedAt.HasValue)
+                {
+                    <div class="text-muted small mt-1">@version.SubmittedAt.Value.ToLocalTime().ToString("g")</div>
+                }
+                @if (!string.IsNullOrWhiteSpace(version.SupervisorApprovalLine))
+                {
+                    <div class="small mt-1">@version.SupervisorApprovalLine</div>
+                }
+                @if (!string.IsNullOrWhiteSpace(version.HeadApprovalLine))
+                {
+                    <div class="small">@version.HeadApprovalLine</div>
+                }
+                @if (!string.IsNullOrWhiteSpace(version.RejectionLine))
+                {
+                    <div class="small text-danger">@version.RejectionLine</div>
+                }
+                @if (!string.IsNullOrWhiteSpace(version.RejectionReason))
+                {
+                    <div class="small text-muted mt-1">@(string.IsNullOrWhiteSpace(version.RejectionLine) ? $"Причина відхилення: {version.RejectionReason}" : version.RejectionReason)</div>
+                }
+            </div>
+        }
+    </div>
+}

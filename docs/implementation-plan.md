@@ -17,6 +17,7 @@ ASP.NET Core MVC + PostgreSQL + .NET 10.
 | DB | PostgreSQL 16+ |
 | ORM | EF Core 10 + Npgsql |
 | Auth | Google OAuth 2.0 |
+| Files | Google Drive API (v2, реалізовано) |
 | Deploy | Docker на Linux |
 
 MVC + Areas: `Admin`, `Secretary`, `Student`, `Employee` — достатньо для v1 без SPA.
@@ -26,8 +27,14 @@ MVC + Areas: `Admin`, `Secretary`, `Student`, `Employee` — достатньо 
 ```
 src/
   DiplomaManagementSystem.Domain
-  DiplomaManagementSystem.Application
-  DiplomaManagementSystem.Infrastructure
+  DiplomaManagementSystem.Application      # use cases, DTO, validators
+    Admin/{Feature}/                       # *Service + validators
+    Admin/{Feature}/Dtos/                  # …Application.Admin.{Feature}.Dtos
+    Admin/{Feature}/Contracts/             # …Application.Admin.{Feature}.Contracts
+    {Area}/Dtos/                           # …Application.{Area}.Dtos
+    {Area}/Contracts/                      # …Application.{Area}.Contracts
+    Persistence/Contracts/                 # …Application.Persistence.Contracts
+  DiplomaManagementSystem.Infrastructure   # EF, migrations, query impl, Drive
   DiplomaManagementSystem.Web
 tests/
   DiplomaManagementSystem.Domain.Tests
@@ -38,11 +45,71 @@ tests/
 ### 0.3 Шари
 
 - **Domain** — сутності, enums, domain services, інваріанти.
-- **Application** — use cases (handlers), DTO, FluentValidation, `IDiplomaAuthorizationService`.
-- **Infrastructure** — EF Core, Google auth, CSV/Excel import, (v2: Google Drive).
+- **Application** — use cases (`*Service`), DTO, FluentValidation; **інтерфейси** — у `{Area}/Contracts/`; read-моделі запитів — у `Persistence/`.
+- **Infrastructure** — `ApplicationDbContext`, EF configurations, **міграції**, **query-класи**, Google Drive, Identity seed, `AddPersistence()`.
 - **Web** — Controllers, ViewModels, Views, localization `uk-UA`.
 
-**v1 без `IFileStorage`** — checkpoint-и без файлів.
+#### 0.3.1 Contracts, Persistence і queries
+
+| Що | Де | Namespace |
+|----|-----|-----------|
+| `I*Service`, cross-cutting interfaces | `Application/{Area}/Contracts/` | `…Application.{Area}.Contracts` |
+| Admin `I*Service` | `Application/Admin/{Feature}/Contracts/` | `…Application.Admin.{Feature}.Contracts` |
+| `IApplicationDbContext`, `I*Queries` | `Application/Persistence/Contracts/` | `…Application.Persistence.Contracts` |
+| `QueryModels`, `DiplomaWritableCriteria` | `Application/Persistence/` | `…Application.Persistence` |
+| `*Service` (реалізації) | `Application/{Area}/` або `Application/Admin/{Feature}/` | `…Application.{Area}.{Feature}` |
+| DTO | `Application/{Area}/Dtos/` або `Application/Admin/{Feature}/Dtos/` | `…Application.{Area}.{Feature}.Dtos` |
+| `ApplicationDbContext`, migrations, `*Queries.cs` | `Infrastructure/Persistence/` | — |
+
+**Приклад Admin (feature folder):**
+
+```
+Application/Admin/AnnualRoles/
+  AnnualRoleService.cs
+  AssignAnnualRoleValidator.cs
+  Dtos/AnnualRoleDtos.cs           → Application.Admin.AnnualRoles.Dtos
+  Contracts/IAnnualRoleService.cs  → Application.Admin.AnnualRoles.Contracts
+```
+
+**Правило:** read-only доступ у workflow-сервісах — через `I*Queries`; запис і транзакції — через `IApplicationDbContext` (tracked entities). Admin CRUD поки що може звертатися до `IApplicationDbContext` напряму.
+
+**DI:**
+
+```csharp
+// Web Program.cs
+services.AddApplication();      // use cases
+services.AddInfrastructure();   // → AddPersistence() + file storage + …
+```
+
+**EF migrations:**
+
+```bash
+dotnet ef migrations add <Name> \
+  --project src/DiplomaManagementSystem.Infrastructure \
+  --startup-project src/DiplomaManagementSystem.Web
+```
+
+#### 0.3.2 Статус міграції на queries (фаза 2)
+
+| Область | Статус |
+|---------|--------|
+| Secretary list / dashboard / report / details (read) | ✓ queries |
+| Employee home, admission review, supervisor / head workflow | ✓ queries |
+| Student diploma (read + lifecycle reads) | ✓ queries |
+| `DiplomaLifecycleHelper` | ✓ `IAdmissionStepQueries` |
+| Admin CRUD, import | `IApplicationDbContext` (навмисно) |
+
+#### 0.3.3 Application layering trade-off (F-06)
+
+Класичний Clean Architecture передбачає, що **Application** залежить лише від Domain і власних abstractions, а EF / Identity / ASP.NET живуть у Infrastructure і Web. У цьому репозиторії свідомо обрано **прагматичний варіант v1**:
+
+| Що в Application | Чому так | Майбутнє (не v1) |
+|------------------|----------|------------------|
+| `FrameworkReference` на `Microsoft.AspNetCore.App` | `UserManager`, Identity types у import і workflow | Винести identity-операції за `IUserAccountService` |
+| `IApplicationDbContext` + tracked writes у `*Service` | Менше mapping-шару для Admin CRUD і import | Repository / unit-of-work у Infrastructure |
+| FluentValidation + use cases в одному проєкті | Швидша доставка feature-ів | Розділити read/write ports за потреби |
+
+**Правило для нового коду:** read-only orchestration — через `I*Queries` у `Persistence/Contracts`; cross-cutting Web concerns (session, claims, ViewComponents) — у Web або нові Application contracts, **не** прямий `DbContext` у Razor. Повна міграція DbContext з Application — **XL / high risk**, не планується до стабілізації workflow.
 
 ---
 
@@ -64,11 +131,12 @@ enum SupervisorAssignmentStatus { Pending, Confirmed, Rejected }
 enum ReviewAssignmentStatus { NotAssigned, Assigned, Completed }
 enum DiplomaLifecycleStatus {
     AwaitingSupervisor, SupervisorConfirmed, TopicInReview,
-    TopicApproved, DocumentsInProgress, ReadyForAdmission, Admitted
+    TopicApproved, WorkInProgressByStudent, DocumentsInProgress,
+    ReadyForAdmission, Admitted
 }
 enum DiplomaAdmissionStatus { NotAdmitted, Admitted }
 enum TopicVersionStatus { PendingSupervisor, PendingHead, Approved, Rejected }
-enum AdmissionCheckpointType {
+enum AdmissionStep {
     SupervisorFeedback, ExternalReview, AntiPlagiarismClearance, FormattingReview
 }
 enum FormattingReviewOutcome { Approved, ApprovedWithRemarks, NotApproved }
@@ -80,9 +148,10 @@ enum FormattingReviewOutcome { Approved, ApprovedWithRemarks, NotApproved }
 |---------|------------------|
 | `DiplomaCreationService` | Створення дипломів при прив'язці групи до сесії; 1 диплом / студент / рік |
 | `DiplomaTopicService` | Версії теми; блок після `Approved` |
-| `AdmissionReadinessService` | `ReadyForAdmission` за формулою з domain-model |
+| `AdmissionWorkflowService` | Кроки допуску (`AdmissionStep`), спроби, outcomes |
 | `DiplomaLifecycleService` | Дозволені переходи `DiplomaLifecycleStatus` |
-| `StudyGroupAssignmentService` | Перевірка: група ще не в іншій сесії |
+| `ReviewerAssignmentService` | Призначення рецензента |
+| `CheckpointCompletionService` | Завершення кроків допуску |
 
 ### 1.3 Audit
 
@@ -97,14 +166,14 @@ enum FormattingReviewOutcome { Approved, ApprovedWithRemarks, NotApproved }
 | Таблиця | Примітки |
 |---------|----------|
 | `academic_years` | `label` unique |
-| `study_groups` | `name` unique, `defence_session_id` FK nullable, **unique** на `defence_session_id` якщо 1:1 на групу — насправді багато груп → одна сесія: unique на `(id)` де session_id set; constraint: одна група не в двох сесіях = `defence_session_id` просто FK без duplicate group ids |
+| `study_groups` | `defence_session_id` FK NOT NULL, unique `(defence_session_id, name)` |
 | `defence_sessions` | |
 | `users` | Identity + `user_kind`, `study_group_id` |
-| `annual_role_assignments` | unique `(academic_year_id, role_type)` |
-| `supervisor_pool_entries` | unique `(defence_session_id, employee_id)` |
+| `annual_role_assignments` | unique `(defence_session_id, role_type)` |
 | `diplomas` | unique `(student_id, academic_year_id)` через join до session year |
 | `diploma_topic_versions` | |
-| `diploma_admission_checkpoints` | unique `(diploma_id, type)` |
+| `diploma_admission_step_attempts` | історія кроків допуску |
+| `diploma_documents` | Google Drive metadata |
 | `diploma_comments` | |
 | `audit_logs` | |
 
@@ -116,7 +185,8 @@ enum FormattingReviewOutcome { Approved, ApprovedWithRemarks, NotApproved }
 
 ### 2.3 Міграції
 
-- `InitialCreate` → seed `AcademicYear` опційно в dev.
+- Проєкт: **`DiplomaManagementSystem.Infrastructure`**
+- Seed admin / dev data — `BootstrapAdminSeeder` (Infrastructure).
 
 ---
 
@@ -139,59 +209,68 @@ enum FormattingReviewOutcome { Approved, ApprovedWithRemarks, NotApproved }
 | Import students | CSV/XLSX: ПІБ, email, group |
 | Import employees | ПІБ, email |
 | Academic years | CRUD |
-| Defence sessions | Create: year, type, semester; assign **groups** |
-| Group → session | При assign: `StudyGroup.DefenceSessionId = session`, create `Diploma` per student |
+| Defence sessions | Create: year, type, semester; перегляд груп сесії |
+| Study groups | CRUD у межах обраної сесії (`DefenceSessionId` обов'язковий) |
 | Annual roles | 4 ролі на рік |
 | Archive session | `DefenceSessionStatus.Archived` |
+| Admin preview | Перегляд UI від імені ролей (dev/support) |
 
-**Правило групи:** якщо `DefenceSessionId != null` — не можна прив'язати до іншої сесії без відв'язки адміном.
+**Правило групи:** група завжди належить одній сесії; назва унікальна в межах сесії.
 
 ### 4.2 Secretary (`ExamCommissionSecretary`)
 
 | Feature | Опис |
 |---------|------|
 | Session selector | Поточна активна сесія в header |
-| Supervisor pool | CRUD викладачів у пулі |
-| Dashboard | Лічильники: без керівника, без теми, без checkpoint-ів, ready, admitted |
+| Dashboard | Лічильники за lifecycle / admission steps |
 | Diploma list | Таблиця + фільтри + checklist partial |
-| Diploma details | Hub: керівник override, рецензент, checkpoints, admit, comments |
+| Diploma details | Hub: керівник override, рецензент, admission steps, admit, comments |
 | Assign reviewer | `ReviewAssignmentStatus` |
 | Admit | `AdmissionStatus`, `DefenceDate`, `LifecycleStatus.Admitted` |
 | Admitted report | Список допущених (HTML + CSV опційно) |
+
+> **Примітка:** окремий «supervisor pool» прибрано — студент обирає керівника зі списку викладачів.
 
 ### 4.3 Student
 
 | Feature | Опис |
 |---------|------|
-| My diploma | Одна картка |
-| Select supervisor | З пулу сесії |
-| Submit topic | Після `SupervisorConfirmed` |
-| View status | Checklist, тема, коментарі |
+| My diploma | Одна картка + workflow progress |
+| Select supervisor | Зі списку викладачів |
+| Submit topic | Після підтвердження керівником |
+| Upload work | PDF/DOCX/ODT → Google Drive |
+| View status | Checklist, тема, коментарі, документи |
 
 ### 4.4 Employee
 
 | Роль | Feature |
 |------|---------|
-| Supervisor | Confirm/reject student; approve/reject topic; complete `SupervisorFeedback` checkpoint |
+| Supervisor | Confirm/reject student; approve/reject topic; `SupervisorFeedback` step + файл |
 | DepartmentHead | Approve/reject topic `PendingHead` |
-| Reviewer | Complete `ExternalReview` checkpoint |
+| Reviewer | Complete `ExternalReview` step + файл |
 | AntiPlagiarismOfficer | Complete `AntiPlagiarismClearance` |
 | FormattingReviewer | `FormattingReview` outcome + comment |
 
-### 4.5 Checkpoints (v1, без файлів)
+### 4.5 Admission steps (з файлами)
 
-UI: кнопка «Зафіксувати» / форма для нормоконтролю.  
-Секретар може override → `AuditLog`.
+UI: завантаження документа + фіксація кроку; нормоконтроль — форма з outcome.  
+Секретар може override крок → `AuditLog`.
 
-Після кожної зміни → `DiplomaLifecycleService.RecalculateAsync`.
+Після кожної зміни → `DiplomaLifecycleService` + `DiplomaLifecycleHelper.RecalculateAsync`.
 
 ---
 
 ## 5. Authorization
 
-`IDiplomaAuthorizationService` + `DiplomaAction` enum.
+`IDiplomaAuthorizationService` + `DiplomaAction` enum — **єдиний шлюз** для перевірки «чи може користувач виконати дію над дипломом у сесії» (supervisor, head, secretary, admission reviewers).
 
 Матриця прав — як у [wiki v1-Roles](https://github.com/bpashkovskyi/diploma-management-system/wiki/v1-Roles-and-Permissions), з заміною імен ролей.
+
+| Рівень | Статус v1 |
+|--------|-----------|
+| MVC `[Authorize(Roles = …)]` на areas | ✓ coarse gate (Admin / Employee / Student) |
+| `DiplomaAction` у workflow services | ✓ supervisor, head, secretary, admission |
+| ASP.NET policies на sub-roles (`DepartmentHead`, `FormattingReviewer`, …) | backlog (F-58) — поки sub-role визначається в сервісі + annual role queries |
 
 `IArchiveGuard` — block writes на archived session.
 
@@ -200,8 +279,8 @@ UI: кнопка «Зафіксувати» / форма для нормокон
 ## 6. UI / Localization
 
 - Bootstrap 5, адаптивна таблиця дипломів.
-- Partials: `_CheckpointChecklist`, `_LifecycleBadge`, `_TopicHistory`.
-- Усі підписи ролей через `IStringLocalizer` → [naming-glossary.md](naming-glossary.md).
+- Partials: admission checklist, lifecycle badge, topic history.
+- Усі підписи ролей через ресурси / `UkrainianDisplay` → [naming-glossary.md](naming-glossary.md).
 
 ---
 
@@ -209,16 +288,17 @@ UI: кнопка «Зафіксувати» / форма для нормокон
 
 | Рівень | Фокус |
 |--------|-------|
-| Domain | Readiness, topic immutability, group-session constraint |
-| Application | Import, authorization |
+| Domain | Lifecycle, topic immutability, group-session constraint |
+| Application | Workflow guidance, authorization, query-backed services |
 | Integration | Testcontainers PG, full admit flow |
 
 **Acceptance scenarios:**
 1. Import → session + groups → diplomas created.
 2. Supervisor flow → topic → head approve.
-3. 4 checkpoints → ready → secretary admit.
+3. 4 admission steps → ready → secretary admit.
 4. Group cannot join two sessions.
 5. Archived session read-only.
+6. Student work upload → Drive folder hierarchy.
 
 ---
 
@@ -232,7 +312,7 @@ services:
 ```
 
 Health: `/health` (DB).  
-Backups: `pg_dump` + (v2) Drive metadata.
+Backups: `pg_dump` + Drive metadata у БД.
 
 ---
 
@@ -243,34 +323,59 @@ Backups: `pg_dump` + (v2) Drive metadata.
 | S1 | Solution, Domain, EF, Docker PG |
 | S2 | Google auth, import, bootstrap admin |
 | S3 | AcademicYear, DefenceSession, group assign, diplomas, annual roles |
-| S4 | Secretary: pool, list, dashboard |
+| S4 | Secretary: list, dashboard |
 | S5 | Student: supervisor, topic |
 | S6 | Supervisor + department head topic flow |
-| S7 | Admission checkpoints + lifecycle recalc |
+| S7 | Admission steps + lifecycle recalc |
 | S8 | Secretary: reviewer, admit, report |
 | S9 | Comments, audit, archive, auth hardening |
 | S10 | Tests, uk-UA polish, UAT |
+| S11+ | Drive documents, query layer, Infrastructure persistence split |
 
 ---
 
-## 10. v2 (out of scope v1, в репо для контексту)
+## 10. v2 (частково в репо)
 
-| Feature | Технологія |
-|---------|------------|
-| Файли документів | **Google Drive API** |
-| Декларація про використання ШІ | **Gaidet** інтеграція |
-| Файл дипломної роботи | Drive |
-| Excel export | ClosedXML |
+| Feature | Статус |
+|---------|--------|
+| Файли документів (Google Drive) | ✓ |
+| Завантаження дипломної роботи студентом | ✓ |
+| Декларація про використання ШІ (Gaidet) | planned |
+| Excel export | planned |
 
 Деталі: [wiki v2-roadmap](https://github.com/bpashkovskyi/diploma-management-system/wiki/v2-Roadmap).
 
 ---
 
-## 11. Наступні кроки docs (Part 2)
+## 11. Деталізація (Part 2)
 
-- [ ] Повний routing table (Controller/Action)
-- [ ] DDL draft
-- [ ] ViewModels per screen
-- [ ] `appsettings` template
+| Артефакт | Файл | Статус |
+|----------|------|--------|
+| Routing table (Controller/Action) | [routing-table.md](routing-table.md) | ✓ |
+| DDL draft (PostgreSQL) | [ddl-draft.sql](ddl-draft.sql) | частково застарілий |
+| ViewModels per screen | [viewmodels.md](viewmodels.md) | ✓ |
+| `appsettings` template | [appsettings.template.json](appsettings.template.json) | ✓ |
+| Code style / tech debt | [code-style-audit.md](code-style-audit.md) | ✓ |
 
-Напишіть **continue** для Part 2.
+### 11.1 Routing — короткий огляд
+
+4 Areas + shared: **Admin** (CRUD, import), **Secretary** (dashboard, diplomas, admit), **Student** (my diploma), **Employee** (supervisor, head, reviewer, anti-plagiarism, formatting).  
+Повна таблиця: 50+ маршрутів з HTTP, policy, sprint — [routing-table.md](routing-table.md).
+
+### 11.2 DDL — короткий огляд
+
+11+ доменних таблиць + Identity (`users` розширює AspNetUsers).  
+Enum-и → `smallint`. Актуальна схема — EF migrations у `Infrastructure/Persistence/Migrations/`.  
+Чернетка: [ddl-draft.sql](ddl-draft.sql).
+
+### 11.3 ViewModels — короткий огляд
+
+~35 ViewModels / screen models, згруповані за Area.  
+Спільні partials: admission checklist, topic version, comment items.  
+Деталі + валідація: [viewmodels.md](viewmodels.md).
+
+### 11.4 Configuration
+
+Секції: `ConnectionStrings`, `Authentication:Google`, `Bootstrap:AdminEmail`, `Security:AllowedEmailDomains`, `Localization`, `Secretary` (cookie сесії), `Import`, `FileStorage` (Drive).  
+Шаблон: [appsettings.template.json](appsettings.template.json).  
+У prod — User Secrets / env vars (`ConnectionStrings__DefaultConnection`, `Authentication__Google__ClientSecret`, тощо).

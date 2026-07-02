@@ -1,0 +1,35 @@
+@model DiplomaManagementSystem.Web.Areas.Admin.Models.DefenceSessionFormViewModel
+@{
+    ViewData["Title"] = Model.Id is null ? "Нова сесія захисту" : "Редагування сесії";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form asp-action="@(Model.Id is null ? "Create" : "Edit")" method="post">
+    @Html.AntiForgeryToken()
+    @if (Model.Id is not null)
+    {
+        <input type="hidden" asp-for="Id"/>
+    }
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="mb-3">
+        <label asp-for="Year" class="form-label">Рік (календарний)</label>
+        <input asp-for="Year" class="form-control" type="number" min="2000" max="2100"/>
+        <span asp-validation-for="Year" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Type" class="form-label">Тип</label>
+        <select asp-for="Type" class="form-select" asp-items="Html.GetLocalizedEnumSelectList<DiplomaManagementSystem.Domain.Enums.DefenceSessionType>(Model.Type)"></select>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Semester" class="form-label">Семестр (опційно)</label>
+        <input asp-for="Semester" class="form-control" type="number" min="1" max="2"/>
+        <span asp-validation-for="Semester" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Зберегти</button>
+    <a class="btn btn-link" asp-action="Index">Скасувати</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial"/>
+}

@@ -1,0 +1,24 @@
+@model DiplomaManagementSystem.Web.Areas.Admin.Models.EmployeeDetailsViewModel
+@{
+    ViewData["Title"] = "Викладач";
+}
+
+<h2>@Model.FullName</h2>
+
+<dl class="row">
+    <dt class="col-sm-3">Email</dt>
+    <dd class="col-sm-9">@Model.Email</dd>
+    <dt class="col-sm-3">Призначення</dt>
+    <dd class="col-sm-9">@(Model.HasAssignments ? $"Є ({DefenceWorkLabel.GraduationWorksInstrumental}, ролі або ін.)" : "Немає")</dd>
+    <dt class="col-sm-3">Створено</dt>
+    <dd class="col-sm-9">@Model.CreatedAt.ToLocalTime().ToString("g")</dd>
+</dl>
+
+<p>
+    <a class="btn btn-outline-secondary" asp-action="Edit" asp-route-id="@Model.Id">Редагувати</a>
+    @if (Model.CanDelete)
+    {
+        <a class="btn btn-outline-danger" asp-action="Delete" asp-route-id="@Model.Id">Видалити</a>
+    }
+    <a class="btn btn-link" asp-action="Index">До списку</a>
+</p>

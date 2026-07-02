@@ -1,0 +1,69 @@
+@model WorkflowProgressViewModel
+
+<div class="card mb-4 workflow-progress-card">
+    <div class="card-body">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+            <h2 class="h5 mb-0">Прогрес підготовки</h2>
+            <span class="text-muted small">@Model.CompletedSteps з @Model.TotalSteps етапів (@Model.ProgressPercent%)</span>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(Model.CurrentStepHint))
+        {
+            <div class="alert alert-info py-2 mb-3 workflow-progress-hint">
+                <strong>@Model.CurrentStepHintLabel</strong> @Model.CurrentStepHint
+            </div>
+        }
+
+        <div class="workflow-progress-layout">
+            <div class="workflow-progress-track"
+                 role="progressbar"
+                 aria-valuenow="@Model.ProgressPercent"
+                 aria-valuemin="0"
+                 aria-valuemax="100"
+                 aria-label="Прогрес підготовки до захисту">
+                <div class="workflow-progress-track__fill @(Model.ProgressPercent >= 100 ? "bg-success" : "bg-primary")"
+                     style="height: @Model.ProgressPercent%">
+                </div>
+            </div>
+
+            <ol class="workflow-steps list-unstyled mb-0">
+                @foreach (var step in Model.Steps)
+                {
+                    <li class="workflow-step workflow-step--@step.StateCssClass">
+                        <div class="workflow-step__marker" aria-hidden="true">
+                            @if (step.State == StudentWorkflowStepState.Completed)
+                            {
+                                <span class="workflow-step__check">✓</span>
+                            }
+                            else
+                            {
+                                <span class="workflow-step__number">@step.Order</span>
+                            }
+                        </div>
+                        <div class="workflow-step__content">
+                            <div class="workflow-step__header">
+                                <div class="workflow-step__title">@step.Title</div>
+                            </div>
+                            @if (!string.IsNullOrWhiteSpace(step.Detail))
+                            {
+                                <div class="workflow-step__detail text-muted small">@step.Detail</div>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(step.Metadata))
+                            {
+                                <div class="workflow-step__metadata text-muted small">@step.Metadata</div>
+                            }
+                            @if (step.IsSecretaryOverride)
+                            {
+                                <span class="badge bg-warning text-dark workflow-step__override">@WorkflowUkrainianLabels.SecretaryOverrideBadge</span>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(step.Comment))
+                            {
+                                <div class="workflow-step__comment small mt-1">@step.Comment</div>
+                            }
+                        </div>
+                    </li>
+                }
+            </ol>
+        </div>
+    </div>
+</div>

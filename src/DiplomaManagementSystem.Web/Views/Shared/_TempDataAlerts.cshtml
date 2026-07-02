@@ -1,0 +1,17 @@
+@{
+    string? flashSuccess = TempData["Success"] as string ?? ViewData["Success"] as string;
+    string? flashError = TempData["Error"] as string ?? ViewData["Error"] as string;
+    string? flashInfo = TempData["Info"] as string ?? ViewData["Info"] as string;
+}
+@if (flashSuccess is not null)
+{
+    <div class="alert alert-success">@flashSuccess</div>
+}
+@if (flashError is not null)
+{
+    <div class="alert alert-danger">@flashError</div>
+}
+@if (flashInfo is not null)
+{
+    <div class="alert alert-info">@flashInfo</div>
+}

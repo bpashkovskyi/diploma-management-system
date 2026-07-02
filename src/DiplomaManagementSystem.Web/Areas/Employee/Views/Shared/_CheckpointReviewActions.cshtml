@@ -1,0 +1,84 @@
+@using DiplomaManagementSystem.Domain.Enums
+@model CheckpointReviewActionsViewModel
+@{
+    string modalId = $"checkpoint-modal-{Model.DiplomaId:N}";
+    string approvedLabel = UkrainianDisplay.FormatCheckpointOutcome(CheckpointOutcome.Approved);
+    string remarksLabel = UkrainianDisplay.FormatCheckpointOutcome(CheckpointOutcome.ApprovedWithRemarks);
+    string notApprovedLabel = UkrainianDisplay.FormatCheckpointOutcome(CheckpointOutcome.NotApproved);
+}
+
+<div class="d-flex flex-wrap gap-2 justify-content-end">
+    <button type="button"
+            class="btn btn-sm btn-success"
+            data-bs-toggle="modal"
+            data-bs-target="#@modalId"
+            data-checkpoint-outcome="@CheckpointOutcome.Approved"
+            data-comment-required="false"
+            data-modal-title="@approvedLabel">
+        @approvedLabel
+    </button>
+    <button type="button"
+            class="btn btn-sm btn-warning"
+            data-bs-toggle="modal"
+            data-bs-target="#@modalId"
+            data-checkpoint-outcome="@CheckpointOutcome.ApprovedWithRemarks"
+            data-comment-required="true"
+            data-modal-title="@remarksLabel">
+        @remarksLabel
+    </button>
+    <button type="button"
+            class="btn btn-sm btn-outline-danger"
+            data-bs-toggle="modal"
+            data-bs-target="#@modalId"
+            data-checkpoint-outcome="@CheckpointOutcome.NotApproved"
+            data-comment-required="true"
+            data-modal-title="@notApprovedLabel">
+        @notApprovedLabel
+    </button>
+</div>
+
+<div class="modal fade"
+     id="@modalId"
+     tabindex="-1"
+     aria-labelledby="@($"{modalId}-label")"
+     aria-hidden="true"
+     data-checkpoint-review-modal>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="@Model.FormAction" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="DiplomaId" value="@Model.DiplomaId"/>
+                <input type="hidden" name="Outcome" value=""/>
+                <input type="hidden" data-requires-document="@Model.RequiresDocumentFile.ToString().ToLowerInvariant()"/>
+                <div class="modal-header">
+                    <h5 class="modal-title" id="@($"{modalId}-label")">
+                        <span data-modal-outcome-title></span> — @Model.StudentFullName
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрити"></button>
+                </div>
+                <div class="modal-body">
+                    <label class="form-label" for="@($"{modalId}-comment")">Коментар</label>
+                    <textarea class="form-control"
+                              id="@($"{modalId}-comment")"
+                              name="Comment"
+                              rows="3"
+                              maxlength="1000"
+                              placeholder="Коментар до рішення"></textarea>
+                    @if (Model.RequiresDocumentFile)
+                    {
+                        <label class="form-label mt-3" for="@($"{modalId}-document")">Файл</label>
+                        <input class="form-control"
+                               id="@($"{modalId}-document")"
+                               type="file"
+                               name="Document"
+                               accept=".pdf,.docx,.odt,application/pdf"/>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Скасувати</button>
+                    <button type="submit" class="btn btn-primary">Зафіксувати</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

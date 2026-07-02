@@ -1,0 +1,45 @@
+@model DiplomaManagementSystem.Web.Areas.Admin.Models.AnnualRolesViewModel
+@{
+    ViewData["Title"] = $"Ролі сесії {Model.SessionLabel}";
+}
+
+<h2>Ролі на сесію захисту</h2>
+<p class="lead">@Model.SessionLabel</p>
+
+<div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+<partial name="_TempDataAlerts"/>
+
+<table class="table">
+    <thead>
+    <tr>
+        <th>Роль</th>
+        <th>Поточний викладач</th>
+        <th>Призначити</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var role in Model.Roles)
+    {
+        <tr>
+            <td>@role.RoleDisplay</td>
+            <td>@(role.AssignedEmployeeName ?? "—")</td>
+            <td>
+                <form asp-action="Assign" method="post" class="row g-2 align-items-center">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="DefenceSessionId" value="@Model.DefenceSessionId"/>
+                    <input type="hidden" name="RoleType" value="@role.RoleType"/>
+                    <div class="col-auto">
+                        <select name="EmployeeId" asp-items="Model.Employees" class="form-select form-select-sm"></select>
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-sm btn-primary">Зберегти</button>
+                    </div>
+                </form>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+<a class="btn btn-link" asp-controller="DefenceSessions" asp-action="Details" asp-route-id="@Model.DefenceSessionId">До сесії</a>

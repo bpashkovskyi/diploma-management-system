@@ -1,0 +1,64 @@
+@using DiplomaManagementSystem.Web
+@using DiplomaManagementSystem.Web.Areas.Secretary.Models
+@model DiplomaManagementSystem.Web.Models.Shared.DiplomaListTableViewModel
+
+@{
+    int columnCount = Model.ShowSupervisorColumn ? 5 : 4;
+}
+
+<table class="table table-hover align-middle">
+    <thead>
+    <tr>
+        <th>Студент</th>
+        <th>Група</th>
+        @if (Model.ShowSupervisorColumn)
+        {
+            <th>Керівник</th>
+        }
+        <th>Тема</th>
+        <th>Статус</th>
+    </tr>
+    </thead>
+    <tbody>
+    @if (!Model.Items.Any())
+    {
+        <tr>
+            <td colspan="@columnCount" class="text-muted">Записів не знайдено.</td>
+        </tr>
+    }
+    @foreach (var item in Model.Items)
+    {
+        <tr>
+            <td>
+                @if (Model.ShowDetailsLink)
+                {
+                    <a asp-area="@Model.DetailsArea"
+                       asp-controller="@Model.DetailsController"
+                       asp-action="@Model.DetailsAction"
+                       asp-route-id="@item.Id">@item.StudentFullName</a>
+                }
+                else
+                {
+                    @item.StudentFullName
+                }
+                <small class="text-muted d-block">@item.StudentEmail</small>
+            </td>
+            <td>@item.StudyGroupName</td>
+            @if (Model.ShowSupervisorColumn)
+            {
+                <td>@(item.SupervisorName ?? "—")</td>
+            }
+            <td>@(string.IsNullOrWhiteSpace(item.TopicTitle) ? "—" : item.TopicTitle)</td>
+            <td>
+                @await Html.PartialAsync("~/Areas/Secretary/Views/Shared/_LifecycleBadge.cshtml", new LifecycleBadgeViewModel
+                {
+                    Display = item.LifecycleDisplay,
+                    BadgeClass = UkrainianDisplay.SecretaryWorkflowBadgeClass(
+                        item.LifecycleStatus,
+                        item.CurrentAdmissionStep),
+                })
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

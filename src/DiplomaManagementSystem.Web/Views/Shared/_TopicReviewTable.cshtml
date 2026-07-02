@@ -1,0 +1,124 @@
+@using DiplomaManagementSystem.Web.Areas.Employee.Models
+@model TopicReviewTableViewModel
+@{
+    int columnCount = Model.ShowSupervisorColumn ? 6 : 5;
+}
+
+<table class="table table-striped align-middle">
+    <thead>
+    <tr>
+        <th>Студент</th>
+        @if (Model.ShowSupervisorColumn)
+        {
+            <th>Керівник</th>
+        }
+        <th>Тема</th>
+        <th>Версія</th>
+        <th>Подано</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    @if (!Model.Items.Any())
+    {
+        <tr>
+            <td colspan="@columnCount" class="text-muted">@Model.EmptyMessage</td>
+        </tr>
+    }
+    @foreach (var item in Model.Items)
+    {
+        string approveModalId = $"approve-topic-{item.VersionId:N}";
+        string rejectModalId = $"reject-topic-{item.VersionId:N}";
+
+        <tr>
+            <td>@item.StudentFullName</td>
+            @if (Model.ShowSupervisorColumn)
+            {
+                <td>@(item.SupervisorFullName ?? "—")</td>
+            }
+            <td>@item.Title</td>
+            <td>v@(item.VersionNumber)</td>
+            <td>@item.SubmittedAt.ToLocalTime().ToString("g")</td>
+            <td class="text-end text-nowrap">
+                <button type="button"
+                        class="btn btn-sm btn-success"
+                        data-bs-toggle="modal"
+                        data-bs-target="#@approveModalId">
+                    @Model.ApproveButtonText
+                </button>
+                <button type="button"
+                        class="btn btn-sm btn-outline-danger"
+                        data-bs-toggle="modal"
+                        data-bs-target="#@rejectModalId">
+                    Відхилити
+                </button>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+@foreach (var item in Model.Items)
+{
+    string approveModalId = $"approve-topic-{item.VersionId:N}";
+    string rejectModalId = $"reject-topic-{item.VersionId:N}";
+
+    <div class="modal fade" id="@approveModalId" tabindex="-1" aria-labelledby="@($"{approveModalId}-label")" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form asp-action="@Model.ApproveAction" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="VersionId" value="@item.VersionId"/>
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="@($"{approveModalId}-label")">@Model.ApproveButtonText — @item.StudentFullName</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрити"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-muted small mb-3">@item.Title · v@(item.VersionNumber)</p>
+                        <label class="form-label" for="@($"{approveModalId}-comment")">Коментар (необов'язково)</label>
+                        <textarea class="form-control"
+                                  id="@($"{approveModalId}-comment")"
+                                  name="Comment"
+                                  rows="3"
+                                  maxlength="1000"
+                                  placeholder="Коментар до рішення"></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Скасувати</button>
+                        <button type="submit" class="btn btn-success">@Model.ApproveButtonText</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="@rejectModalId" tabindex="-1" aria-labelledby="@($"{rejectModalId}-label")" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form asp-action="@Model.RejectAction" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="VersionId" value="@item.VersionId"/>
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="@($"{rejectModalId}-label")">Відхилити тему — @item.StudentFullName</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрити"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-muted small mb-3">@item.Title · v@(item.VersionNumber)</p>
+                        <label class="form-label" for="@($"{rejectModalId}-reason")">Причина відхилення</label>
+                        <textarea class="form-control"
+                                  id="@($"{rejectModalId}-reason")"
+                                  name="RejectionReason"
+                                  rows="3"
+                                  required
+                                  maxlength="1000"
+                                  placeholder="Опишіть, що потрібно виправити"></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Скасувати</button>
+                        <button type="submit" class="btn btn-danger">Відхилити тему</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}

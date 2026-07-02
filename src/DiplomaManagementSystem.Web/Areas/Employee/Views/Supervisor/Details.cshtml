@@ -1,0 +1,19 @@
+@model DiplomaDetailsViewModel
+@using DiplomaManagementSystem.Application
+@using DiplomaManagementSystem.Web.Areas.Secretary.Models
+@{
+    ViewData["Title"] = DefenceWorkLabel.SingularCapitalized(Model.SessionType) + " — " + Model.StudentFullName;
+}
+
+<h1 class="mb-1">@Model.StudentFullName</h1>
+<p class="text-muted mb-4">@Model.StudentEmail · @Model.StudyGroupName</p>
+
+<partial name="_TempDataAlerts"/>
+
+<p class="mb-3">
+    <a asp-action="Students">← @EmployeePageTitles.MyStudents</a>
+    ·
+    <a asp-area="Employee" asp-controller="Home" asp-action="Index">@EmployeePageTitles.Home</a>
+</p>
+
+<partial name="_DiplomaDetailsReadOnly" model="Model"/>

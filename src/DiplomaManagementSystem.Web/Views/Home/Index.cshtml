@@ -1,0 +1,16 @@
+@{
+    ViewData["Title"] = "Головна";
+}
+
+<div class="text-center">
+    <h1 class="display-5">Система управління випусковими роботами</h1>
+    @if (User.Identity?.IsAuthenticated != true)
+    {
+        <p class="lead mt-3">Увійдіть через Google, щоб продовжити.</p>
+        <a class="btn btn-primary btn-lg" asp-controller="Account" asp-action="Login">Увійти (Google)</a>
+    }
+    else
+    {
+        <p class="lead mt-3">Вітаємо, @User.Identity.Name</p>
+    }
+</div>

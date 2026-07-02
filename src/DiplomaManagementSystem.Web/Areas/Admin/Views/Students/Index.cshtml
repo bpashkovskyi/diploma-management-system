@@ -1,0 +1,39 @@
+@model DiplomaManagementSystem.Web.Areas.Admin.Models.StudentListViewModel
+@{
+    ViewData["Title"] = "Студенти";
+}
+
+<h2>Студенти</h2>
+<partial name="_TempDataAlerts"/>
+<p class="text-muted">Сесія: @Model.SessionLabel</p>
+
+<p>
+    <a class="btn btn-primary" asp-action="Create" asp-route-defenceSessionId="@Model.DefenceSessionId">Новий студент</a>
+    <a class="btn btn-outline-secondary" asp-controller="Import" asp-action="Students" asp-route-defenceSessionId="@Model.DefenceSessionId">Імпорт</a>
+    <a class="btn btn-link" asp-controller="DefenceSessions" asp-action="Details" asp-route-id="@Model.DefenceSessionId">До сесії</a>
+</p>
+
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th>ПІБ</th>
+        <th>Email</th>
+        <th>Група</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model.Items)
+    {
+        <tr>
+            <td>@item.FullName</td>
+            <td>@item.Email</td>
+            <td>@item.StudyGroupName</td>
+            <td class="text-end">
+                <a class="btn btn-sm btn-outline-primary" asp-action="Details" asp-route-id="@item.Id">Деталі</a>
+                <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@item.Id">Редагувати</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

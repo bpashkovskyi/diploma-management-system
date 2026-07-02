@@ -1,0 +1,31 @@
+@model DiplomaManagementSystem.Web.Areas.Admin.Models.StudentDeleteViewModel
+@{
+    ViewData["Title"] = "Видалення студента";
+}
+
+<h2>Видалення студента</h2>
+
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+<p>Ви впевнені, що хочете видалити студента <strong>@Model.FullName</strong> (@Model.Email)?</p>
+
+@if (!Model.CanDelete)
+{
+    <div class="alert alert-warning">
+        <p class="mb-0">@DefenceWorkLabel.StudentLinkedToWork(Model.SessionType)</p>
+    </div>
+}
+
+@if (Model.CanDelete)
+{
+    <form asp-action="Delete" method="post" data-confirm="Видалити студента? Дію не можна скасувати.">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id"/>
+        <button type="submit" class="btn btn-danger">Видалити</button>
+        <a class="btn btn-link" asp-action="Index" asp-route-defenceSessionId="@Model.DefenceSessionId">Скасувати</a>
+    </form>
+}
+else
+{
+    <a class="btn btn-link" asp-action="Index" asp-route-defenceSessionId="@Model.DefenceSessionId">Назад</a>
+}

@@ -7,7 +7,7 @@
 | Код (C# / БД) | UI (українська) | Було в wiki |
 |---------------|-----------------|-------------|
 | `DefenceSession` | Сесія захисту / Захист | Defense |
-| `Diploma` | Дипломна робота | Work |
+| `Diploma` | Бакалаврська / магістерська робота (залежно від `DefenceSessionType`) | Work |
 | `DiplomaTopicVersion` | Тема | TopicVersion |
 | `DiplomaComment` | Коментар | Comment |
 | `DiplomaAdmissionCheckpoint` | Вимога на допуск | Document |

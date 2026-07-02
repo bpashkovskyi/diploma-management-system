@@ -1,0 +1,31 @@
+@model DiplomaManagementSystem.Web.Areas.Admin.Models.EmployeeFormViewModel
+@{
+    ViewData["Title"] = Model.Id is null ? "Новий викладач" : "Редагування викладача";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form asp-action="@(Model.Id is null ? "Create" : "Edit")" method="post">
+    @Html.AntiForgeryToken()
+    @if (Model.Id is not null)
+    {
+        <input type="hidden" asp-for="Id"/>
+    }
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="mb-3">
+        <label asp-for="FullName" class="form-label">ПІБ</label>
+        <input asp-for="FullName" class="form-control" maxlength="200"/>
+        <span asp-validation-for="FullName" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Email" class="form-label">Email</label>
+        <input asp-for="Email" class="form-control" type="email" maxlength="256"/>
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Зберегти</button>
+    <a class="btn btn-link" asp-action="Index">Скасувати</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial"/>
+}

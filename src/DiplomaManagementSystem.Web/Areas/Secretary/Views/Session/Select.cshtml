@@ -1,0 +1,32 @@
+@model SessionSelectViewModel
+@{
+    ViewData["Title"] = "Оберіть сесію захисту";
+}
+
+<h1 class="mb-4">@ViewData["Title"]</h1>
+
+<partial name="_TempDataAlerts"/>
+
+@if (!Model.Sessions.Any())
+{
+    <div class="alert alert-warning">
+        Для вашого облікового запису не призначено роль секретаря ДЕК на жоден навчальний рік.
+    </div>
+}
+else
+{
+    <form asp-action="Select" method="post" class="col-md-6">
+        @Html.AntiForgeryToken()
+        <div class="mb-3">
+            <label class="form-label" for="sessionId">Сесія захисту</label>
+            <select class="form-select" id="sessionId" name="sessionId" required>
+                <option value="">— оберіть —</option>
+                @foreach (var session in Model.Sessions)
+                {
+                    <option value="@session.Value">@session.Text</option>
+                }
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Продовжити</button>
+    </form>
+}

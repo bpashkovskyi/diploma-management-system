@@ -1,0 +1,181 @@
+@model MyDiplomaViewModel
+@{
+    ViewData["Title"] = Model.SessionType.HasValue
+        ? DefenceWorkLabel.MyWork(Model.SessionType.Value)
+        : "Моя робота";
+}
+
+<h1 class="mb-4">@ViewData["Title"]</h1>
+
+<partial name="_TempDataAlerts"/>
+
+@if (!Model.HasDiploma)
+{
+    <div class="alert alert-info">
+        @(Model.SessionType.HasValue
+            ? DefenceWorkLabel.NotCreatedYet(Model.SessionType.Value)
+            : "Випускову роботу ще не створено. Зверніться до адміністратора після додавання до сесії захисту.")
+    </div>
+}
+else
+{
+    @if (Model.WorkflowProgress is not null)
+    {
+        @await Html.PartialAsync("~/Views/Shared/_WorkflowProgress.cshtml", Model.WorkflowProgress)
+    }
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">@Model.SessionLabel</h5>
+            <dl class="row mb-0">
+                <dt class="col-sm-3">Статус</dt>
+                <dd class="col-sm-9">
+                    @if (Model.LifecycleStatus.HasValue)
+                    {
+                        <span class="badge @UkrainianDisplay.LifecycleBadgeClass(Model.LifecycleStatus.Value)">@Model.LifecycleDisplay</span>
+                    }
+                </dd>
+                <dt class="col-sm-3">Керівник</dt>
+                <dd class="col-sm-9">
+                    @(Model.SupervisorName ?? "—")
+                    @if (Model.SupervisorAssignmentStatus.HasValue)
+                    {
+                        <span class="text-muted">(@Model.SupervisorAssignmentDisplay)</span>
+                    }
+                </dd>
+                <dt class="col-sm-3">Тема</dt>
+                <dd class="col-sm-9">
+                    @(Model.CurrentTopicTitle ?? "—")
+                    @if (Model.TopicStatus.HasValue)
+                    {
+                        <span class="text-muted">(@Model.TopicStatusDisplay)</span>
+                    }
+                </dd>
+            </dl>
+        </div>
+    </div>
+
+    @if (Model.ShowSupervisorSection)
+    {
+        <div class="card mb-4">
+            <div class="card-header">Обрати керівника</div>
+            <div class="card-body">
+                @if (Model.CanSelectSupervisor)
+                {
+                    <form asp-action="SelectSupervisor" method="post" class="row g-2 align-items-end">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="DiplomaId" value="@Model.DiplomaId"/>
+                        <div class="col-md-8">
+                            <select class="form-select" name="SupervisorId" required>
+                                <option value="">— оберіть викладача —</option>
+                                @foreach (var supervisor in Model.SupervisorPool)
+                                {
+                                    <option value="@supervisor.Value">@supervisor.Text</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-primary">Надіслати запит</button>
+                        </div>
+                    </form>
+                }
+                else if (!string.IsNullOrWhiteSpace(Model.SelectSupervisorBlockedReason))
+                {
+                    <div class="alert alert-info mb-0">@Model.SelectSupervisorBlockedReason</div>
+                }
+            </div>
+        </div>
+    }
+
+    @if (Model.ShowTopicSubmissionSection)
+    {
+        <div class="card mb-4">
+            <div class="card-header">Подати тему</div>
+            <div class="card-body">
+                @if (Model.CanSubmitTopic)
+                {
+                    <a class="btn btn-primary" asp-action="SubmitTopic">Подати тему</a>
+                }
+                else if (!string.IsNullOrWhiteSpace(Model.SubmitTopicBlockedReason))
+                {
+                    <div class="alert alert-info mb-0">@Model.SubmitTopicBlockedReason</div>
+                }
+            </div>
+        </div>
+    }
+
+    @if (Model.ShowWorkUploadSection)
+    {
+        <div class="card mb-4">
+            <div class="card-header">Завантажити роботу</div>
+            <div class="card-body">
+                @if (Model.CanUploadWork)
+                {
+                    <p class="mb-3">Дозволені формати: PDF, DOCX, ODT. Кожне завантаження створює нову версію файлу.</p>
+                    <form asp-action="UploadWork" method="post" enctype="multipart/form-data" class="row g-2 align-items-end">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="DiplomaId" value="@Model.DiplomaId"/>
+                        <div class="col-md-8">
+                            <input class="form-control" type="file" name="WorkFile" accept=".pdf,.docx,.odt,application/pdf" required/>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-primary w-100">Завантажити</button>
+                        </div>
+                    </form>
+                }
+                else if (!string.IsNullOrWhiteSpace(Model.UploadWorkBlockedReason))
+                {
+                    <div class="alert alert-info mb-0">@Model.UploadWorkBlockedReason</div>
+                }
+            </div>
+        </div>
+    }
+
+    @if (Model.Documents is not null)
+    {
+        @await Html.PartialAsync("~/Views/Shared/_DiplomaDocuments.cshtml", Model.Documents)
+    }
+
+    @if (Model.ShowWorkReadinessSection)
+    {
+        <div class="card mb-4">
+            <div class="card-header">Готовність до перевірок</div>
+            <div class="card-body">
+                @if (Model.CanDeclareWorkReady)
+                {
+                    <p class="mb-3">Коли робота виконана і готова до перевірок, повідомте про це — розпочнуться контрольні точки допуску.</p>
+                    <form asp-action="DeclareWorkReady" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-primary">Робота готова до перевірок</button>
+                    </form>
+                }
+                else if (!string.IsNullOrWhiteSpace(Model.DeclareWorkReadyBlockedReason))
+                {
+                    <div class="alert alert-info mb-0">@Model.DeclareWorkReadyBlockedReason</div>
+                }
+            </div>
+        </div>
+    }
+
+    <div class="mb-4">
+        <h2 class="h5">Історія затвердження тем</h2>
+        @await Html.PartialAsync("_TopicHistory", Model.TopicHistory)
+    </div>
+
+    @if (Model.Comments.Any())
+    {
+        <h2 class="h5">Коментарі</h2>
+        <div class="list-group mb-4">
+            @foreach (var comment in Model.Comments)
+            {
+                <div class="list-group-item">
+                    <div class="d-flex justify-content-between">
+                        <strong>@comment.AuthorName</strong>
+                        <small class="text-muted">@comment.CreatedAt.ToLocalTime().ToString("g")</small>
+                    </div>
+                    <p class="mb-0 mt-1">@comment.Body</p>
+                </div>
+            }
+        </div>
+    }
+}

@@ -1,0 +1,119 @@
+@model DiplomaManagementSystem.Web.Areas.Secretary.Models.DiplomaDetailsViewModel
+
+@await Html.PartialAsync("~/Views/Shared/_WorkflowProgress.cshtml", Model.WorkflowProgress)
+
+@await Html.PartialAsync("~/Views/Shared/_DiplomaDocuments.cshtml", Model.Documents)
+
+<partial name="_TopicHistorySection" model="Model.TopicHistory"/>
+
+@if (Model.AdmissionSteps.Any())
+{
+    <div class="card mb-4">
+        <div class="card-header">Кроки допуску</div>
+        <div class="card-body py-2 px-3">
+            <table class="table table-sm mb-0">
+                <thead>
+                <tr>
+                    <th>Крок</th>
+                    <th>Статус</th>
+                    <th>Результат</th>
+                    <th>Спроб</th>
+                    <th>Зафіксовано</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var step in Model.AdmissionSteps)
+                {
+                    <tr>
+                        <td>@step.StepDisplay</td>
+                        <td>
+                            @if (step.IsPassing)
+                            {
+                                <span class="text-success">✓</span>
+                            }
+                            else if (step.AttemptCount > 0)
+                            {
+                                <span class="text-danger">✗</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">—</span>
+                            }
+                            @if (step.IsSecretaryOverride)
+                            {
+                                <span class="badge bg-warning text-dark ms-1">@WorkflowUkrainianLabels.SecretaryOverrideBadge</span>
+                            }
+                        </td>
+                        <td>
+                            @(step.OutcomeDisplay ?? "—")
+                            @if (!string.IsNullOrWhiteSpace(step.Comment))
+                            {
+                                <div class="text-muted small">@step.Comment</div>
+                            }
+                        </td>
+                        <td>@step.AttemptCount</td>
+                        <td>
+                            @if (step.RecordedAt.HasValue)
+                            {
+                                <span>@step.RecordedByName</span>
+                                <div class="text-muted small">@step.RecordedAt.Value.ToLocalTime().ToString("g")</div>
+                            }
+                            else
+                            {
+                                <span>—</span>
+                            }
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@if (Model.AttemptHistory.Any())
+{
+    <div class="card mb-4">
+        <div class="card-header">Історія спроб</div>
+        <div class="list-group list-group-flush">
+            @foreach (var attempt in Model.AttemptHistory)
+            {
+                <div class="list-group-item">
+                    <div class="d-flex justify-content-between">
+                        <strong>@attempt.StepDisplay · спроба @attempt.AttemptNumber</strong>
+                        <small class="text-muted">@attempt.RecordedAt.ToLocalTime().ToString("g")</small>
+                    </div>
+                    <div class="small">
+                        @attempt.OutcomeDisplay
+                        @if (attempt.IsSecretaryOverride)
+                        {
+                            <span class="badge bg-warning text-dark ms-1">@WorkflowUkrainianLabels.SecretaryOverrideBadge</span>
+                        }
+                        · @attempt.RecordedByName
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(attempt.Comment))
+                    {
+                        <p class="mb-0 mt-1 small">@attempt.Comment</p>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@if (Model.Comments.Any())
+{
+    <h2 class="h5">Коментарі</h2>
+    <div class="list-group mb-4">
+        @foreach (var comment in Model.Comments)
+        {
+            <div class="list-group-item">
+                <div class="d-flex justify-content-between">
+                    <strong>@comment.AuthorName</strong>
+                    <small class="text-muted">@comment.CreatedAt.ToLocalTime().ToString("g")</small>
+                </div>
+                <p class="mb-0 mt-1">@comment.Body</p>
+            </div>
+        }
+    </div>
+}

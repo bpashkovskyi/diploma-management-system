@@ -1,0 +1,44 @@
+@model DiplomaManagementSystem.Web.Areas.Admin.Models.ImportStudentsViewModel
+@{
+    ViewData["Title"] = "Імпорт студентів";
+}
+
+<h2>Імпорт студентів</h2>
+<partial name="_TempDataAlerts"/>
+<p class="text-muted">Сесія: @Model.SessionLabel</p>
+<p>Формат: ПІБ, email, група (перший рядок — заголовок, опційно). Групи створюються в межах сесії.</p>
+
+<form asp-action="Students" method="post" enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="DefenceSessionId"/>
+    <div class="mb-3">
+        <label asp-for="File" class="form-label">Файл (.csv, .xlsx)</label>
+        <input asp-for="File" class="form-control" type="file" accept=".csv,.xlsx"/>
+        <span asp-validation-for="File" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Імпортувати</button>
+    <a class="btn btn-link" asp-controller="Students" asp-action="Index" asp-route-defenceSessionId="@Model.DefenceSessionId">До списку</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial"/>
+}
+
+@if (Model.Result is not null)
+{
+    <div class="alert alert-info mt-4">
+        <strong>Результат:</strong>
+        всього @Model.Result.TotalRows,
+        імпортовано @Model.Result.ImportedCount,
+        пропущено @Model.Result.SkippedCount
+    </div>
+    @if (Model.Result.Errors.Count > 0)
+    {
+        <ul class="text-danger">
+            @foreach (string error in Model.Result.Errors)
+            {
+                <li>@error</li>
+            }
+        </ul>
+    }
+}

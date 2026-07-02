@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/DiplomaManagementSystem.Application/DiplomaManagementSystem.Application.csproj" />
+    <Project Path="src/DiplomaManagementSystem.Domain/DiplomaManagementSystem.Domain.csproj" />
+    <Project Path="src/DiplomaManagementSystem.Infrastructure/DiplomaManagementSystem.Infrastructure.csproj" />
+    <Project Path="src/DiplomaManagementSystem.Web/DiplomaManagementSystem.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/DiplomaManagementSystem.Application.Tests/DiplomaManagementSystem.Application.Tests.csproj" />
+    <Project Path="tests/DiplomaManagementSystem.Domain.Tests/DiplomaManagementSystem.Domain.Tests.csproj" />
+    <Project Path="tests/DiplomaManagementSystem.Integration.Tests/DiplomaManagementSystem.Integration.Tests.csproj" />
+    <Project Path="tests/DiplomaManagementSystem.Web.Tests/DiplomaManagementSystem.Web.Tests.csproj" />
+  </Folder>
+</Solution>

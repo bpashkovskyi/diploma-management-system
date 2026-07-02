@@ -1,0 +1,46 @@
+@model EmployeeHomeViewModel
+@{
+    ViewData["Title"] = EmployeePageTitles.Home;
+}
+
+<h1 class="mb-4">@ViewData["Title"]</h1>
+
+<partial name="_TempDataAlerts"/>
+
+@if (!Model.Roles.Any())
+{
+    <div class="alert alert-info">
+        Для вашого облікового запису ще немає активних ролей. Після призначення керівником або завідувачем кафедри тут з’являться відповідні розділи.
+    </div>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var role in Model.Roles)
+        {
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">@role.RoleDisplay</h5>
+                        <p class="card-text">
+                            @if (role.RoleKey == "SupervisorStudents")
+                            {
+                                <text>Студентів: <strong>@role.PendingCount</strong></text>
+                            }
+                            else
+                            {
+                                <text>Очікує дій: <strong>@role.PendingCount</strong></text>
+                            }
+                        </p>
+                        <a class="btn btn-primary"
+                           asp-area="Employee"
+                           asp-controller="@role.Controller"
+                           asp-action="@role.Action">
+                            Перейти
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

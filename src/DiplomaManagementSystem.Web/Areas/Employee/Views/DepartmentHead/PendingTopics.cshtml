@@ -1,0 +1,21 @@
+@model PendingTopicsViewModel
+@{
+    ViewData["Title"] = EmployeePageTitles.ApproveTopicAsDepartmentHead;
+    var table = new TopicReviewTableViewModel
+    {
+        Items = Model.Items,
+        ApproveButtonText = "Затвердити",
+        EmptyMessage = "Немає тем на затвердження.",
+        ShowSupervisorColumn = true,
+    };
+}
+
+<h1 class="mb-4">@ViewData["Title"]</h1>
+
+<partial name="_TempDataAlerts"/>
+
+<p class="mb-3">
+    <a asp-area="Employee" asp-controller="Home" asp-action="Index">@EmployeePageTitles.Home</a>
+</p>
+
+<partial name="_TopicReviewTable" model="table"/>

@@ -3,6 +3,13 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
+# Local diploma file storage (dev/test uploads)
+src/DiplomaManagementSystem.Web/App_Data/
+
+# Repair script build output
+scripts/**/bin/
+scripts/**/obj/
+
 # User-specific files
 *.rsuser
 *.suo
@@ -10,6 +17,13 @@
 *.userosscache
 *.sln.docstates
 *.env
+appsettings.json
+appsettings.*.local.json
+!appsettings.*.local.json.example
+secrets/
+!secrets/.gitkeep
+impressive-mile*.json
+*-service-account.json
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
@@ -427,3 +441,4 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+/.build-out

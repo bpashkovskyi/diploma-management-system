@@ -1,0 +1,3 @@
+namespace DiplomaManagementSystem.Application.Import.Models;
+
+public sealed record EmployeeImportRow(string FullName, string Email) : IImportRow;

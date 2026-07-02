@@ -1,0 +1,184 @@
+@model DiplomaDetailsViewModel
+@{
+    ViewData["Title"] = DefenceWorkLabel.SingularCapitalized(Model.SessionType) + " — " + Model.StudentFullName;
+}
+
+<h1 class="mb-1">@Model.StudentFullName</h1>
+<p class="text-muted mb-4">@Model.StudentEmail · @Model.StudyGroupName</p>
+
+<partial name="_TempDataAlerts"/>
+
+<p class="mb-3">
+    <a asp-action="Index">← @DefenceWorkLabel.PluralCapitalized(Model.SessionType)</a>
+</p>
+
+<partial name="_DiplomaDetailsReadOnly" model="Model"/>
+
+@if (Model.ShowAssignReviewerSection)
+{
+    <div class="card mb-4">
+        <div class="card-header">Призначити рецензента</div>
+        <div class="card-body">
+            @if (Model.ReviewerId is not null)
+            {
+                <p class="text-muted small mb-3">
+                    Поточний рецензент: <strong>@(Model.ReviewerName ?? "—")</strong> (@Model.ReviewAssignmentDisplay)
+                </p>
+            }
+            @if (Model.CanAssignReviewer)
+            {
+                <form asp-action="AssignReviewer" method="post" class="row g-2">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="DiplomaId" value="@Model.Id"/>
+                    <div class="col-md-8">
+                        <select class="form-select" name="ReviewerId" required>
+                            <option value="">— оберіть рецензента —</option>
+                            @foreach (var employee in Model.EmployeePool)
+                            {
+                                if (employee.Value == Model.ReviewerId?.ToString())
+                                {
+                                    <option value="@employee.Value" selected="selected">@employee.Text</option>
+                                }
+                                else
+                                {
+                                    <option value="@employee.Value">@employee.Text</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-primary w-100">@(Model.ReviewerId is null ? "Призначити" : "Змінити")</button>
+                    </div>
+                </form>
+            }
+            else if (!string.IsNullOrWhiteSpace(Model.AssignReviewerBlockedReason))
+            {
+                <div class="alert alert-info mb-0">@Model.AssignReviewerBlockedReason</div>
+            }
+        </div>
+    </div>
+}
+
+@if (Model.ShowOverrideSupervisorSection)
+{
+    <div class="card mb-4">
+        <div class="card-header">Змінити керівника</div>
+        <div class="card-body">
+            @if (Model.CanOverrideSupervisor)
+            {
+                <form asp-action="OverrideSupervisor" method="post" class="row g-2">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="DiplomaId" value="@Model.Id"/>
+                    <div class="col-md-4">
+                        <select class="form-select" name="SupervisorId" required>
+                            <option value="">— оберіть викладача —</option>
+                            @foreach (var supervisor in Model.EmployeePool)
+                            {
+                                <option value="@supervisor.Value">@supervisor.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-5">
+                        <input class="form-control" name="Reason" placeholder="Причина зміни" required maxlength="500"/>
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-outline-warning w-100">Змінити</button>
+                    </div>
+                </form>
+            }
+            else if (!string.IsNullOrWhiteSpace(Model.OverrideSupervisorBlockedReason))
+            {
+                <div class="alert alert-info mb-0">@Model.OverrideSupervisorBlockedReason</div>
+            }
+        </div>
+    </div>
+}
+
+@if (Model.ShowAdmitSection)
+{
+    <div class="card mb-4 @(Model.CanAdmit ? "border-success" : null)">
+        <div class="card-header @(Model.CanAdmit ? "bg-success text-white" : null)">Допустити до захисту</div>
+        <div class="card-body">
+            @if (Model.CanAdmit)
+            {
+                <form asp-action="Admit" method="post" class="row g-2 align-items-end">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="DiplomaId" value="@Model.Id"/>
+                    <div class="col-md-4">
+                        <label class="form-label">Дата захисту</label>
+                        <input class="form-control" type="date" name="DefenceDate" required/>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-success">Допустити</button>
+                    </div>
+                </form>
+            }
+            else if (!string.IsNullOrWhiteSpace(Model.AdmitBlockedReason))
+            {
+                <div class="alert alert-info mb-0">@Model.AdmitBlockedReason</div>
+            }
+        </div>
+    </div>
+}
+
+@if (Model.ShowOverrideAdmissionStepSection)
+{
+    <div class="card mb-4">
+        <div class="card-header">@WorkflowUkrainianLabels.SecretaryOverrideAdmissionStepSection</div>
+        <div class="card-body">
+            @if (Model.CanOverrideAdmissionStep)
+            {
+                <form asp-action="OverrideAdmissionStep" method="post" class="row g-2">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="DiplomaId" value="@Model.Id"/>
+                    <input type="hidden" name="Step" value="@Model.CurrentAdmissionStep"/>
+                    <div class="col-12">
+                        <p class="text-muted small mb-0">
+                            Крок: <strong>@Model.CurrentAdmissionStepDisplay</strong>
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <select class="form-select" name="Outcome" required>
+                            @foreach (var outcome in CheckpointOutcomeSelectList.Build())
+                            {
+                                <option value="@outcome.Value">@outcome.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <textarea class="form-control" name="Comment" rows="3" required maxlength="2000" placeholder="Коментар до рішення"></textarea>
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-outline-warning">@WorkflowUkrainianLabels.SecretaryOverrideApplyButton</button>
+                    </div>
+                </form>
+            }
+            else if (!string.IsNullOrWhiteSpace(Model.OverrideAdmissionStepBlockedReason))
+            {
+                <div class="alert alert-info mb-0">@Model.OverrideAdmissionStepBlockedReason</div>
+            }
+        </div>
+    </div>
+}
+
+@if (Model.ShowAddCommentSection)
+{
+    <div class="card mb-4">
+        <div class="card-header">Додати коментар</div>
+        <div class="card-body">
+            @if (Model.CanAddComment)
+            {
+                <form asp-action="AddComment" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="DiplomaId" value="@Model.Id"/>
+                    <textarea class="form-control mb-2" name="Body" rows="3" required maxlength="2000" placeholder="Текст коментаря"></textarea>
+                    <button type="submit" class="btn btn-primary">Додати</button>
+                </form>
+            }
+            else if (!string.IsNullOrWhiteSpace(Model.AddCommentBlockedReason))
+            {
+                <div class="alert alert-info mb-0">@Model.AddCommentBlockedReason</div>
+            }
+        </div>
+    </div>
+}

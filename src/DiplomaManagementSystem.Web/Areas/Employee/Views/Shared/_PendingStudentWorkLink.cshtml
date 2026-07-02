@@ -2,9 +2,7 @@
 
 @if (Model is not null)
 {
-    <a href="@Model.ViewUrl" target="_blank" rel="noopener" title="@Model.FileName">
-        v@(Model.VersionNumber)
-    </a>
+    <a href="@Model.ViewUrl" target="_blank" rel="noopener" title="@Model.FileName">v@(Model.VersionNumber)</a>
 }
 else
 {

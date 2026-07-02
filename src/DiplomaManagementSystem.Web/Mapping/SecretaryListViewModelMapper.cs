@@ -15,24 +15,24 @@ internal static class SecretaryListViewModelMapper
         DiplomaListFilterDto filter,
         bool showSupervisorColumn,
         bool showDetailsLink) => new()
-    {
-        Items = page.Items.Select(SecretaryListViewModelMapper.MapListItem).ToList(),
-        ShowSupervisorColumn = showSupervisorColumn,
-        ShowDetailsLink = showDetailsLink,
-        Filter = new DiplomaListFilterViewModel
         {
-            LifecycleStatus = filter.LifecycleStatus,
-            CurrentAdmissionStep = filter.CurrentAdmissionStep,
-            StudyGroupId = filter.StudyGroupId,
-            Search = filter.Search,
-            LifecycleStatuses = BuildLifecycleSelectList(filter.LifecycleStatus),
-            AdmissionSteps = BuildAdmissionStepSelectList(filter.CurrentAdmissionStep),
-            StudyGroups = page.StudyGroups
+            Items = page.Items.Select(SecretaryListViewModelMapper.MapListItem).ToList(),
+            ShowSupervisorColumn = showSupervisorColumn,
+            ShowDetailsLink = showDetailsLink,
+            Filter = new DiplomaListFilterViewModel
+            {
+                LifecycleStatus = filter.LifecycleStatus,
+                CurrentAdmissionStep = filter.CurrentAdmissionStep,
+                StudyGroupId = filter.StudyGroupId,
+                Search = filter.Search,
+                LifecycleStatuses = BuildLifecycleSelectList(filter.LifecycleStatus),
+                AdmissionSteps = BuildAdmissionStepSelectList(filter.CurrentAdmissionStep),
+                StudyGroups = page.StudyGroups
                 .Select(group => new SelectListItem(group.Name, group.Id.ToString(), group.Id == filter.StudyGroupId))
                 .Prepend(new SelectListItem("Усі групи", string.Empty))
                 .ToList(),
-        },
-    };
+            },
+        };
 
     public static DiplomaListViewModel MapIndex(DiplomaListPageDto page, DiplomaListFilterDto filter) => new()
     {

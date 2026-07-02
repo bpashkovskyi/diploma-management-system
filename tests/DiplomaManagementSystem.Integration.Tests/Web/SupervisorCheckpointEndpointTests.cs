@@ -28,7 +28,7 @@ public sealed class SupervisorCheckpointEndpointTests(PostgreSqlFixture fixture)
         checkpointsPage.EnsureSuccessStatusCode();
         string html = await checkpointsPage.Content.ReadAsStringAsync();
         Assert.Contains("Student One", html, StringComparison.Ordinal);
-        Assert.Contains(">v1<", html, StringComparison.Ordinal);
+        IntegrationTestHtmlAssertions.AssertContainsText(html, "v1");
 
         string token = AntiforgeryTokenParser.Parse(html);
         byte[] documentBytes = "test document content"u8.ToArray();

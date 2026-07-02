@@ -1,5 +1,5 @@
-using DiplomaManagementSystem.Application.ReadModels;
 using DiplomaManagementSystem.Application.Documents.Dtos;
+using DiplomaManagementSystem.Application.ReadModels;
 using DiplomaManagementSystem.Application.Student;
 using DiplomaManagementSystem.Domain.Enums;
 

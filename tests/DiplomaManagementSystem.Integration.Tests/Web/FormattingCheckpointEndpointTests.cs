@@ -26,7 +26,7 @@ public sealed class FormattingCheckpointEndpointTests(PostgreSqlFixture fixture)
         HttpResponseMessage pageResponse = await client.GetAsync("/Employee/FormattingReview/Pending");
         pageResponse.EnsureSuccessStatusCode();
         string html = await pageResponse.Content.ReadAsStringAsync();
-        Assert.Contains(">v1<", html, StringComparison.Ordinal);
+        IntegrationTestHtmlAssertions.AssertContainsText(html, "v1");
         string token = AntiforgeryTokenParser.Parse(html);
 
         FormUrlEncodedContent form = new(new Dictionary<string, string>

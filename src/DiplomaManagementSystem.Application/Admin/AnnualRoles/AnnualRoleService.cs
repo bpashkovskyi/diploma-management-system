@@ -1,7 +1,7 @@
 using DiplomaManagementSystem.Application.Admin.AnnualRoles.Contracts;
 using DiplomaManagementSystem.Application.Admin.AnnualRoles.Dtos;
-using DiplomaManagementSystem.Application.ReadModels;
 using DiplomaManagementSystem.Application.Persistence.Contracts;
+using DiplomaManagementSystem.Application.ReadModels;
 using DiplomaManagementSystem.Application.Secretary;
 using DiplomaManagementSystem.Domain.Entities;
 using DiplomaManagementSystem.Domain.Enums;

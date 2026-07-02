@@ -1,10 +1,10 @@
 using DiplomaManagementSystem.Application.Common.Contracts;
-using DiplomaManagementSystem.Application.ReadModels;
 using DiplomaManagementSystem.Application.Documents.Contracts;
 using DiplomaManagementSystem.Application.Documents.Dtos;
 using DiplomaManagementSystem.Application.Identity;
 using DiplomaManagementSystem.Application.Persistence;
 using DiplomaManagementSystem.Application.Persistence.Contracts;
+using DiplomaManagementSystem.Application.ReadModels;
 using DiplomaManagementSystem.Application.Secretary;
 using DiplomaManagementSystem.Application.Storage;
 using DiplomaManagementSystem.Application.Student.Contracts;

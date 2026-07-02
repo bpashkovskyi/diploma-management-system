@@ -1,6 +1,5 @@
-using DiplomaManagementSystem.Domain.Enums;
-
 using DiplomaManagementSystem.Application.ReadModels;
+using DiplomaManagementSystem.Domain.Enums;
 
 namespace DiplomaManagementSystem.Application.Admin.AnnualRoles.Dtos;
 

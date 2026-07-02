@@ -61,7 +61,8 @@ internal static class StudentDiplomaViewModelMapper
                     ReviewedAt = version.ReviewedAt,
                 })
                 .ToList(),
-            TopicHistory = TopicHistoryMapper.Map(topicDetailVersions),            Comments = dto.History.Comments
+            TopicHistory = TopicHistoryMapper.Map(topicDetailVersions),
+            Comments = dto.History.Comments
                 .Select(comment => new CommentItemViewModel
                 {
                     AuthorName = comment.AuthorName,
